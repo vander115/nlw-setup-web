@@ -6,6 +6,7 @@ import { api } from '../lib/axios';
 
 interface IHabitListProps {
   date: Date;
+  onCompletedChanged: (completed: number) => void;
 }
 
 interface IHabitInfo {
@@ -17,7 +18,7 @@ interface IHabitInfo {
   completedHabits: string[];
 }
 
-export function HabitsList({ date }: IHabitListProps) {
+export function HabitsList({ date, onCompletedChanged }: IHabitListProps) {
   const [habitsInfo, setHabitsInfo] = useState<IHabitInfo>();
   useEffect(() => {
     api
@@ -41,14 +42,15 @@ export function HabitsList({ date }: IHabitListProps) {
       completedHabits = habitsInfo!.completedHabits.filter(
         (id) => id !== habitId,
       );
-
-      setHabitsInfo({
-        possibleHabits: habitsInfo!.possibleHabits,
-        completedHabits,
-      });
     } else {
       completedHabits = [...habitsInfo!.completedHabits, habitId];
     }
+    setHabitsInfo({
+      possibleHabits: habitsInfo!.possibleHabits,
+      completedHabits,
+    });
+
+    onCompletedChanged(completedHabits.length);
   }
 
   const isDateInPast = dayjs(date).endOf('day').isBefore(new Date());
@@ -61,10 +63,10 @@ export function HabitsList({ date }: IHabitListProps) {
             key={habit.id}
             onCheckedChange={() => handleToggleHabit(habit.id)}
             disabled={isDateInPast}
-            defaultChecked={habitsInfo.completedHabits.includes(habit.id)}
+            checked={habitsInfo.completedHabits.includes(habit.id)}
             className="flex items-center gap-3 group"
           >
-            <div className="h-8 w-8 rounded-lg flex items-center justify-center bg-zinc-900 border-2 border-zinc-800 group-data-[state=checked]:bg-green-500  group-data-[state=checked]:border-green-500">
+            <div className="h-8 w-8 rounded-lg flex items-center justify-center bg-zinc-900 border-2 border-zinc-800 group-data-[state=checked]:bg-green-500  group-data-[state=checked]:border-green-500 transition-colors">
               <Checkbox.Indicator>
                 <Check size={20} className="text-white" />
               </Checkbox.Indicator>
